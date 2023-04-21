@@ -1,0 +1,41 @@
+{
+  "name": "dismoi",
+  "version": "0.1.0",
+  "description": "dependency injection for javascript projects",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "pta"
+  },
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lorenzofox3/dismoi.git"
+  },
+  "keywords": [
+    "di",
+    "dependency",
+    "injection",
+    "provide"
+  ],
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "import": {
+        "default": "./src/index.js"
+      }
+    }
+  },
+  "prettier": {
+    "singleQuote": true
+  },
+  "author": "Laurent RENARD",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/lorenzofox3/dismoi/issues"
+  },
+  "homepage": "https://github.com/lorenzofox3/dismoi#readme",
+  "devDependencies": {
+    "prettier": "^2.8.7",
+    "pta": "^1.2.0"
+  }
+}
