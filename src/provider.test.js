@@ -1,5 +1,10 @@
 import { test } from 'zora';
-import { createProvider, provideSymbol, singleton } from './provider.js';
+import {
+  createProvider,
+  fromClass,
+  provideSymbol,
+  singleton,
+} from './provider.js';
 
 test('instantiates an injectable, calling the factory', ({ eq }) => {
   const provide = createProvider({
@@ -225,4 +230,34 @@ test(`"api" defines the public API`, ({ eq }) => {
   };
 
   eq(Object.keys(moduleAPI), ['a', 'c']);
+});
+
+test('"fromClass" wraps the class within a factory', ({ eq }) => {
+  class A {
+    constructor({ b }) {
+      this.b = b;
+    }
+
+    test() {
+      return this.b.value;
+    }
+  }
+
+  class B {
+    constructor({ c }) {
+      this.value = c;
+    }
+  }
+
+  const provide = createProvider({
+    injectables: {
+      a: fromClass(A),
+      b: fromClass(B),
+      c: 'test',
+    },
+  });
+
+  const { a } = provide();
+
+  eq(a.test(), 'test');
 });

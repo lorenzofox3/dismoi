@@ -8,6 +8,8 @@ const mapValues = (mapFn) => (source) =>
 
 export const valueFn = (val) => () => val;
 
+export const fromClass = (Klass) => (deps) => new Klass(deps);
+
 export const provideSymbol = Symbol('provide');
 
 export const singleton = (factory) => {
