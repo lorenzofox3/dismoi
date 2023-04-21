@@ -85,7 +85,26 @@ test('resolves dependency graph, instantiating the transitive dependencies ', ({
   eq(services.a, 'b+d');
 });
 
-test(`only instantiates a service when required`, ({ eq, notOk, ok }) => {
+test('injection tokens can be symbols', ({ eq }) => {
+  const aSymbol = Symbol('a');
+  const bSymbol = Symbol('b');
+  const cSymbol = Symbol('c');
+  const dSymbol = Symbol('d');
+
+  const provide = createProvider({
+    injectables: {
+      [aSymbol]: ({ [bSymbol]: b, [cSymbol]: c }) => b + '+' + c,
+      [bSymbol]: () => 'b',
+      [cSymbol]: ({ [dSymbol]: d }) => d,
+      [dSymbol]: 'd',
+    },
+  });
+
+  const services = provide();
+  eq(services[aSymbol], 'b+d');
+});
+
+test(`only instantiates an injectable when required`, ({ eq, notOk, ok }) => {
   let aInstantiated = false;
   let bInstantiated = false;
   let cInstantiated = false;

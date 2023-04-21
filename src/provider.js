@@ -22,7 +22,7 @@ export const singleton = (factory) => {
   };
 };
 
-export const createProvider = ({ injectables, api = [] } = {}) => {
+export const createProvider = ({ injectables, api = [] }) => {
   return function provide(externalDeps = {}) {
     const _injectables = new Proxy(
       {
