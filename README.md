@@ -1,6 +1,8 @@
 # dismoi
 
-Dependency Injection for Javascript on any platform
+Dependency Injection for Javascript on any platform. 
+
+[Less than 1kb of code](https://bundlephobia.com/package/dismoi@0.0.2)
 
 ## Installation 
 
