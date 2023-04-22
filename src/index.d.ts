@@ -3,7 +3,7 @@ type EmptyMap = {};
 /**
  * Factory as defined in the injectable property: either a function with eventually a single named dependencies argument object or a value
  */
-export type FactoryFn<FactoryLike> = FactoryLike extends (args: any) => unknown
+export type FactoryFn<FactoryLike> = FactoryLike extends (args: any) => any
   ? FactoryLike
   : () => FactoryLike;
 
@@ -43,16 +43,27 @@ declare const provideSymbol: unique symbol;
 // todo not only keys should map for the omit but the type as well
 export type ExternalDeps<Registry extends Object> = Omit<
   FlatDependencyTree<Registry>,
-  keyof InjectableMap<Registry> | typeof provideSymbol
+  keyof InjectableMap<Registry> | typeof provideSymbol // provideSymbol is never required
 > &
   Partial<InjectableMap<Registry>>;
+
+export type RequiredKeys<T> = {
+  [K in keyof T]-?: {} extends Pick<T, K> ? never : K;
+}[keyof T];
+
+type ModuleAPI<
+  Registry extends Object,
+  PublicAPI extends Array<keyof Registry> = []
+> = {
+  [injectable in PublicAPI[number]]: Injectable<Registry[injectable]>;
+};
 
 export type ProviderFn<
   Registry extends Object,
   PublicAPI extends Array<keyof Registry> = []
-> = (externalDeps: ExternalDeps<Registry>) => {
-  [method in PublicAPI[number]]: Injectable<Registry[method]>;
-};
+> = RequiredKeys<ExternalDeps<Registry>> extends never
+  ? (externalDeps?: ExternalDeps<Registry>) => ModuleAPI<Registry, PublicAPI>
+  : (externalDeps: ExternalDeps<Registry>) => ModuleAPI<Registry, PublicAPI>;
 
 declare function valueFn<T>(value: T): () => T;
 

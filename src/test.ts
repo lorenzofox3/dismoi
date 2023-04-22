@@ -150,8 +150,32 @@ const singletonFactoryBis = singleton(() => ({ x: 42 }));
 const returnValueBis: { x: number } = singletonFactoryBis();
 
 // provideSymbol is not a mandatory dep
-const provide = createProvider({
+createProvider({
   injectables: {
     foo: ({ [provideSymbol]: provide }) => 42,
   },
 })({});
+
+// when all dependencies are provide, external Deps is optional
+let provideFulfilled = createProvider({
+  injectables: {
+    foo: ({ val }: { val: number }) => val,
+    val: 42,
+  },
+  api: ['foo'],
+});
+provideFulfilled();
+provideFulfilled({});
+provideFulfilled({ val: 72 });
+
+let provideMissing = createProvider({
+  injectables: {
+    foo: ({ val }: { val: number }) => val,
+  },
+  api: ['foo'],
+});
+provideMissing({ val: 72 });
+// @ts-expect-error
+provideMissing();
+// @ts-expect-error
+provideMissing({});
