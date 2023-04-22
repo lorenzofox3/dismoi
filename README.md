@@ -104,6 +104,8 @@ See the [extensive test suite](src/provider.test.js) for advanced usages.
 
 Typescript is well-supported and the compiler will throw if there are incompatible dependencies or if some are missing.
 
+![typescript compiler error](assets/compiler-ts.png)
+
 
 
 
