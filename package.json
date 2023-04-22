@@ -1,10 +1,13 @@
 {
   "name": "dismoi",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "dependency injection for javascript projects",
   "main": "src/index.js",
+  "types": "src/index.d.ts",
   "scripts": {
-    "test": "pta"
+    "test:unit": "pta",
+    "test:types": "tsc src/test.ts --noEmit",
+    "test": "npm run test:unit && npm run test:types"
   },
   "type": "module",
   "repository": {
@@ -17,11 +20,17 @@
     "injection",
     "provide"
   ],
+  "files": [
+    "src/index.js",
+    "src/index.d.ts",
+    "src/provider.js"
+  ],
   "exports": {
     "./package.json": "./package.json",
     ".": {
       "import": {
-        "default": "./src/index.js"
+        "default": "./src/index.js",
+        "types": "./src/index.d.ts"
       }
     }
   },
@@ -36,6 +45,7 @@
   "homepage": "https://github.com/lorenzofox3/dismoi#readme",
   "devDependencies": {
     "prettier": "^2.8.7",
-    "pta": "^1.2.0"
+    "pta": "^1.2.0",
+    "typescript": "^5.0.4"
   }
 }
