@@ -65,7 +65,7 @@ How factories get registered in the module is left out: simple imports, to sophi
 
 ### Create a provider
 
-You pass the injectable registry to the ``createProvider`` alongside with the injectable list you want to expose to the ``createProvider`` function.
+You pass the injectable registry to the ``createProvider`` function alongside with the injectable list you want to expose.
 It gives you a function to instantiate the module:
 
 Example using the injectables aforementioned
