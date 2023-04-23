@@ -27,7 +27,12 @@ export const createProvider = ({ injectables, api = [] }) => {
     const _injectables = new Proxy(
       {
         ...injectables,
-        [provideSymbol]: valueFn((subArgs = {}) => provide(subArgs)),
+        [provideSymbol]: valueFn((subArgs = {}) =>
+          provide({
+            ...externalDeps,
+            ...subArgs,
+          })
+        ),
         ...externalDeps,
       },
       {

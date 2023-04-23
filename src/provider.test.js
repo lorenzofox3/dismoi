@@ -233,6 +233,36 @@ test('provide is itself injected', ({ eq }) => {
   eq(usecaseB, 'repository&some_service');
 });
 
+test('provide is itself injected, so are late bindings', ({ eq }) => {
+  const withSession = (factory) => {
+    return ({ [provideSymbol]: provide }) => {
+      return factory(
+        provide({
+          session: true,
+        })
+      );
+    };
+  };
+
+  const provide = createProvider({
+    injectables: {
+      usecaseA: withSession(
+        ({ repository, service }) => repository + '&' + service
+      ),
+      usecaseB: ({ repository, service }) => repository + '&' + service,
+      repository: ({ session }) =>
+        session ? 'repositoryWithSession' : 'repository',
+      session: undefined,
+      // service is missing and will be late bound
+    },
+  });
+
+  const { usecaseA, usecaseB } = provide({ service: 'some_service' });
+
+  eq(usecaseA, 'repositoryWithSession&some_service');
+  eq(usecaseB, 'repository&some_service');
+});
+
 test(`"api" defines the public API`, ({ eq }) => {
   const provide = createProvider({
     injectables: {
