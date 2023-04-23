@@ -1,6 +1,6 @@
 {
   "name": "dismoi",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "dependency injection for javascript projects",
   "main": "src/index.js",
   "types": "src/index.d.ts",

@@ -58,12 +58,18 @@ type ModuleAPI<
   [injectable in PublicAPI[number]]: Injectable<Registry[injectable]>;
 };
 
+type ProviderFnArgs<Registry extends Object> = {
+  [key in keyof ExternalDeps<Registry>]:
+    | ExternalDeps<Registry>[key]
+    | ((arg?: FlatDependencyTree<Registry>) => ExternalDeps<Registry>[key]);
+};
+
 export type ProviderFn<
   Registry extends Object,
   PublicAPI extends Array<keyof Registry> = []
 > = RequiredKeys<ExternalDeps<Registry>> extends never
-  ? (externalDeps?: ExternalDeps<Registry>) => ModuleAPI<Registry, PublicAPI>
-  : (externalDeps: ExternalDeps<Registry>) => ModuleAPI<Registry, PublicAPI>;
+  ? (externalDeps?: ProviderFnArgs<Registry>) => ModuleAPI<Registry, PublicAPI>
+  : (externalDeps: ProviderFnArgs<Registry>) => ModuleAPI<Registry, PublicAPI>;
 
 declare function valueFn<T>(value: T): () => T;
 

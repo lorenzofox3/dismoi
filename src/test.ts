@@ -175,6 +175,7 @@ let provideMissing = createProvider({
   api: ['foo'],
 });
 provideMissing({ val: 72 });
+provideMissing({ val: () => 42 });
 // @ts-expect-error
 provideMissing();
 // @ts-expect-error
