@@ -1,13 +1,14 @@
 {
   "name": "dismoi",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "dependency injection for javascript projects",
-  "main": "src/index.js",
+  "main": "src/index.cjs",
   "types": "src/index.d.ts",
   "scripts": {
     "test:unit": "pta",
     "test:types": "tsc src/test.ts --noEmit",
-    "test": "npm run test:unit && npm run test:types"
+    "test": "npm run test:unit && npm run test:types",
+    "build": "rollup -c rollup.js"
   },
   "type": "module",
   "repository": {
@@ -18,12 +19,15 @@
     "di",
     "dependency",
     "injection",
-    "provide"
+    "provide",
+    "dependency injection",
+    "ioc"
   ],
   "files": [
     "src/index.js",
     "src/index.d.ts",
-    "src/provider.js"
+    "src/provider.js",
+    "src/index.cjs"
   ],
   "exports": {
     "./package.json": "./package.json",
@@ -31,6 +35,9 @@
       "import": {
         "default": "./src/index.js",
         "types": "./src/index.d.ts"
+      },
+      "require": {
+        "default": "./src/index.cjs"
       }
     }
   },
@@ -46,6 +53,7 @@
   "devDependencies": {
     "prettier": "^2.8.7",
     "pta": "^1.2.0",
+    "rollup": "^3.21.0",
     "typescript": "^5.0.4"
   }
 }

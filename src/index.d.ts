@@ -1,5 +1,3 @@
-type EmptyMap = {};
-
 /**
  * Factory as defined in the injectable property: either a function with eventually a single named dependencies argument object or a value
  */
@@ -12,10 +10,9 @@ type NamedArguments<FactoryLike> = Parameters<FactoryFn<FactoryLike>>[0];
 /**
  * The dependencies map of a given factory: if there is no argument, the type is an empty map
  */
-export type Dependencies<FactoryLike> =
-  NamedArguments<FactoryLike> extends undefined
-    ? EmptyMap
-    : NamedArguments<FactoryLike>;
+type Dependencies<FactoryLike> = NamedArguments<FactoryLike> extends undefined
+  ? never
+  : NamedArguments<FactoryLike>;
 
 /**
  * The actual injectable: ie what a factory instantiates
@@ -28,46 +25,41 @@ type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
   ? I
   : never;
 
-export type FlatDependencyTree<Registry extends Object> = UnionToIntersection<
+export type FlatDependencyTree<Registry> = UnionToIntersection<
   {
     [key in keyof Registry]: Dependencies<Registry[key]>;
   }[keyof Registry]
 >;
 
-export type InjectableMap<Registry extends Object> = {
+export type InjectableMap<Registry> = {
   [key in keyof Registry]: Injectable<Registry[key]>;
 };
 
 declare const provideSymbol: unique symbol;
 
 // todo not only keys should map for the omit but the type as well
-export type ExternalDeps<Registry extends Object> = Omit<
+type Diff<T, U> = Pick<T, Exclude<keyof T, keyof U>>;
+
+export type ExternalDeps<Registry extends Record<string, unknown>> = Diff<
   FlatDependencyTree<Registry>,
-  keyof InjectableMap<Registry> | typeof provideSymbol // provideSymbol is never required
+  InjectableMap<Registry>
 > &
   Partial<InjectableMap<Registry>>;
 
-export type RequiredKeys<T> = {
-  [K in keyof T]-?: {} extends Pick<T, K> ? never : K;
-}[keyof T];
-
-type ModuleAPI<
-  Registry extends Object,
-  PublicAPI extends Array<keyof Registry> = []
-> = {
+type ModuleAPI<Registry, PublicAPI extends Array<keyof Registry> = []> = {
   [injectable in PublicAPI[number]]: Injectable<Registry[injectable]>;
 };
 
-type ProviderFnArgs<Registry extends Object> = {
+type ProviderFnArgs<Registry extends Record<string, unknown>> = {
   [key in keyof ExternalDeps<Registry>]:
     | ExternalDeps<Registry>[key]
     | ((arg?: FlatDependencyTree<Registry>) => ExternalDeps<Registry>[key]);
 };
 
 export type ProviderFn<
-  Registry extends Object,
+  Registry extends Record<string, unknown>,
   PublicAPI extends Array<keyof Registry> = []
-> = RequiredKeys<ExternalDeps<Registry>> extends never
+> = Partial<InjectableMap<Registry>> extends ExternalDeps<Registry>
   ? (externalDeps?: ProviderFnArgs<Registry>) => ModuleAPI<Registry, PublicAPI>
   : (externalDeps: ProviderFnArgs<Registry>) => ModuleAPI<Registry, PublicAPI>;
 
@@ -81,7 +73,7 @@ declare function singleton<Factory extends (...args: any[]) => any>(
 ): (...args: Parameters<Factory>) => ReturnType<Factory>;
 
 declare function createProvider<
-  Registry extends Object,
+  Registry extends Record<string, unknown>,
   PublicAPI extends Array<keyof Registry> = []
 >(args: {
   injectables: Registry;
