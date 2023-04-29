@@ -10,9 +10,13 @@ type NamedArguments<FactoryLike> = Parameters<FactoryFn<FactoryLike>>[0];
 /**
  * The dependencies map of a given factory: if there is no argument, the type is an empty map
  */
-type Dependencies<FactoryLike> = NamedArguments<FactoryLike> extends undefined
-  ? never
-  : NamedArguments<FactoryLike>;
+
+type Defined<T> = T extends undefined ? never : T;
+
+/**
+ * The dependencies map of a given factory: if there is no argument, the type is an empty map
+ */
+type Dependencies<FactoryLike> = Defined<NamedArguments<FactoryLike>>;
 
 /**
  * The actual injectable: ie what a factory instantiates
