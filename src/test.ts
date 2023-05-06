@@ -6,7 +6,7 @@ import type {
   InjectableMap,
   ProviderFn,
 } from './index';
-import { createProvider, provideSymbol } from './index';
+import { createProvider, FulfilledDependencies, provideSymbol } from './index';
 
 injectables: {
   // result from a factory (the return value type)
@@ -41,9 +41,7 @@ injectables: {
     blah: 42,
     bar: (x: number) => String(x),
   };
-}
 
-injectablesMap: {
   let injectablesMap: InjectableMap<{
     foo: () => number;
     bar: string;
@@ -92,7 +90,7 @@ dependenciesTree: {
 
   const dependenciesTreeImpossible: FlatDependencyTree<{
     foo: (arg: { x: number; blah: string }) => any;
-    bar: (arg: { x: string }) => any; // x must is "never"
+    bar: (arg: { x: string }) => any; // x is "never"
     bim: (arg: { y: string }) => any;
   }> = {
     // @ts-expect-error
@@ -101,6 +99,38 @@ dependenciesTree: {
     blah: 'hello',
     y: 'woot',
   };
+}
+
+fulfilledDependencies: {
+  let fulfilled: FulfilledDependencies<{
+    foo: (arg: { x: number; blah: string; woot: { prop: number } }) => any;
+    x: ({ otherThing }: { otherThing: string; y: string }) => number;
+    woot: () => { prop: number };
+  }> = 'x';
+  fulfilled = 'woot';
+
+  // @ts-expect-error
+  // blah is not met
+  fulfilled = 'blah';
+
+  // @ts-expect-error
+  // otherThing is not met
+  fulfilled = 'otherThing';
+
+  let incompatibleInterfaces: FulfilledDependencies<{
+    x: (deps: { y: number; woot: { prop: { nested: number } } }) => any;
+    y: () => string;
+    woot: (deps: { met: string }) => { prop: { nested: string } };
+    met: () => string;
+  }> = 'met';
+
+  // @ts-expect-error
+  // y should return a number
+  incompatibleInterfaces = 'y';
+
+  // @ts-expect-error
+  // nested type should be number
+  incompatibleInterfaces = 'woot';
 }
 
 lateBoundDependencies: {
@@ -168,15 +198,30 @@ createProvider: {
     },
   })({});
 
+  let someProvider = createProvider({
+    injectables: {
+      a: ({ b }: { b: string }) => b,
+      b: () => 42,
+    },
+    api: ['a'],
+  });
+
+  // @ts-expect-error
+  // b is not a number
+  someProvider();
+
+  let f = createProvider({
+    injectables: {
+      a: ({ b }: { b: number }) => b,
+      c: ({ b }: { b: string }) => b,
+      b: 42,
+    },
+    api: ['a'],
+  });
+
+  // @ts-expect-error
   // b can not be fulfilled
-  // let f = createProvider({
-  //   injectables: {
-  //     a: ({ b }: { b: number }) => b,
-  //     c: ({ b }: { b: string }) => b,
-  //     b: 42,
-  //   },
-  //   api: ['a'],
-  // });
+  f();
 
   // when all dependencies are provide, external Deps is optional
   const provideFulfilled = createProvider({
