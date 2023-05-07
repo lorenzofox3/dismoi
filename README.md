@@ -1,8 +1,8 @@
 # dismoi
 
-Dependency Injection for Javascript on any platform. 
+[Lightweight (less than 1kb of code)](https://bundlephobia.com/package/dismoi) declarative Dependency Injection library for Javascript on any platform.
 
-[Less than 1kb of code](https://bundlephobia.com/package/dismoi@0.0.2)
+The dependency registry is centralized which leads to a good type inference and the ability to type check the dependency graph before runtime.  
 
 ## Installation 
 
@@ -28,7 +28,7 @@ You define a registry of *injectable* items within a flat object whose keys (str
 
 A factory must have the following signature 
 
-``<T extends Object>(deps?: T) => any // returns an injectable``
+``<T extends {}}>(deps?: T) => any // returns an injectable``
 
 ``deps`` is an object providing the named dependency map of the injectable.
 
