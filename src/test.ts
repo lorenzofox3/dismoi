@@ -6,7 +6,12 @@ import type {
   InjectableMap,
   ProviderFn,
 } from './index';
-import { createProvider, FulfilledDependencies, provideSymbol } from './index';
+import {
+  createProvider,
+  fromClass,
+  FulfilledDependencies,
+  provideSymbol,
+} from './index';
 
 injectables: {
   // result from a factory (the return value type)
@@ -248,4 +253,22 @@ createProvider: {
   provideMissing();
   // @ts-expect-error
   provideMissing({});
+}
+
+fromClass: {
+  class Foo {
+    constructor({ b }: { b: string }) {}
+  }
+  let factory = fromClass(Foo);
+  factory({ b: 'woot' });
+  // @ts-expect-error
+  // wrong dependency type
+  factory({ c: 42 });
+
+  // @ts-expect-error
+  // not a class
+  fromClass(42);
+  // @ts-expect-error
+  // not a class
+  fromClass(() => 42);
 }

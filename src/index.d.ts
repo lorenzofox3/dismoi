@@ -56,8 +56,6 @@ export type FulfilledDependencies<Registry extends ObjectLike> = {
     : never;
 }[MaybeMet<Registry>];
 
-type Diff<T, U> = Pick<T, Exclude<keyof T, keyof U>>;
-
 export type ExternalDeps<Registry extends ObjectLike> = Omit<
   FlatDependencyTree<Registry>,
   FulfilledDependencies<Registry>
@@ -97,5 +95,6 @@ declare function createProvider<
   api?: PublicAPI;
 }): ProviderFn<Registry, PublicAPI>;
 
-// todo
-// declare function fromClass = () => (x)
+declare function fromClass<T extends abstract new (deps: any) => any>(
+  Klass: T
+): (deps: Defined<ConstructorParameters<T>[0]>) => InstanceType<T>;
