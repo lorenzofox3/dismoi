@@ -28,7 +28,7 @@ You define a registry of *injectable* items within a flat object whose keys (str
 
 A factory must have the following signature 
 
-``<T extends {}}>(deps?: T) => any // returns an injectable``
+``<T extends {}>(deps?: T) => any // returns an injectable``
 
 ``deps`` is an object providing the named dependency map of the injectable.
 
