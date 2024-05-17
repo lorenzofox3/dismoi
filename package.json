@@ -1,6 +1,6 @@
 {
   "name": "dismoi",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "dependency injection for javascript projects",
   "main": "dist/index.cjs",
   "types": "dist/index.d.ts",
@@ -8,7 +8,7 @@
     "test:unit": "pta",
     "test:types": "tsc src/test.ts --noEmit",
     "test": "npm run test:unit && npm run test:types",
-    "build": "rollup -c rollup.js && cp src/index.d.ts dist/index.d.ts"
+    "build": "rollup -c rollup.js && cp src/index.d.ts dist/ && cp src/index.d.ts dist/index.d.cts"
   },
   "type": "module",
   "repository": {
@@ -34,7 +34,8 @@
         "types": "./dist/index.d.ts"
       },
       "require": {
-        "default": "./dist/index.cjs"
+        "default": "./dist/index.cjs",
+        "types": "./dist/index.d.cts"
       }
     }
   },
@@ -48,9 +49,9 @@
   },
   "homepage": "https://github.com/lorenzofox3/dismoi#readme",
   "devDependencies": {
-    "prettier": "^2.8.7",
+    "prettier": "^3.2.5",
     "pta": "^1.2.0",
-    "rollup": "^3.21.0",
-    "typescript": "^5.0.4"
+    "rollup": "^4.17.2",
+    "typescript": "^5.4.5"
   }
 }
