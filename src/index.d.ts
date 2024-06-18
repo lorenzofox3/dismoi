@@ -69,7 +69,7 @@ type ModuleAPI<Registry, PublicAPI extends Array<keyof Registry> = []> = {
 type ProviderFnArgs<Registry extends ObjectLike> = {
   [key in keyof ExternalDeps<Registry>]:
     | ExternalDeps<Registry>[key]
-    | ((arg?: FlatDependencyTree<Registry>) => ExternalDeps<Registry>[key]);
+    | ((arg?: InjectableMap<Registry>) => ExternalDeps<Registry>[key]); // technically there is no constraint on arg, it is quite the opposite: it may bring new constraints but this gets contrived.
 };
 
 export type ProviderFn<
