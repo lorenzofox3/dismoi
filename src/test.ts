@@ -272,3 +272,19 @@ fromClass: {
   // not a class
   fromClass(() => 42);
 }
+
+issue4: {
+  let injectables = {
+    a: ({ value }: { value: number }) => value + 10,
+    intermediate: () => '120',
+  };
+  const provideMissingWithIntermediate = createProvider({
+    injectables: injectables,
+    api: ['a']
+  });
+
+
+  provideMissingWithIntermediate({
+    value: ({ intermediate }: { intermediate: string }) => Number(intermediate)
+  })
+}
