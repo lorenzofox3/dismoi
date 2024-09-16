@@ -31,11 +31,7 @@ type ObjectLike = Record<string, unknown>;
  * All the dependencies of the declared injectables on a registry
  */
 export type FlatDependencyTree<Registry extends ObjectLike> =
-  UnionToIntersection<
-    {
-      [key in keyof Registry]: Dependencies<Registry[key]>;
-    }[keyof Registry]
-  >;
+  UnionToIntersection<Dependencies<Registry[keyof Registry]>>;
 
 /**
  * All the Injectables defined by a registry
@@ -79,6 +75,17 @@ export type ProviderFn<
   ? (externalDeps?: ProviderFnArgs<Registry>) => ModuleAPI<Registry, PublicAPI>
   : (externalDeps: ProviderFnArgs<Registry>) => ModuleAPI<Registry, PublicAPI>;
 
+/**
+ * Checks if each injectable match the required dependencies of the entire registry
+ */
+type ValidateRegistry<Registry extends ObjectLike> = {
+  [K in keyof Registry]: K extends keyof FlatDependencyTree<Registry>
+    ? Injectable<Registry[K]> extends FlatDependencyTree<Registry>[K]
+      ? Registry[K] // -> fulfilled dependency
+      : never // -> unfulfilled dependency
+    : Registry[K]; // -> not a dependency
+};
+
 declare function valueFn<T>(value: T): () => T;
 
 declare const provideSymbol: unique symbol;
@@ -91,7 +98,7 @@ declare function createProvider<
   Registry extends ObjectLike,
   PublicAPI extends Array<keyof Registry> = []
 >(args: {
-  injectables: Registry;
+  injectables: ValidateRegistry<Registry>;
   api?: PublicAPI;
 }): ProviderFn<Registry, PublicAPI>;
 

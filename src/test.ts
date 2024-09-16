@@ -203,30 +203,27 @@ createProvider: {
     },
   })({});
 
-  let someProvider = createProvider({
+  createProvider({
     injectables: {
-      a: ({ b }: { b: string }) => b,
-      b: () => 42,
+      foo: ({ a }: { a: number }) => a,
+      bar: ({ b }: { b: string }) => b,
+      // @ts-expect-error a is not a number
+      a: "42",
+      // @ts-expect-error b is not a string 
+      b: () => 42 as number,
     },
-    api: ['a'],
+    api: ['foo', 'bar'],
   });
 
-  // @ts-expect-error
-  // b is not a number
-  someProvider();
-
-  let f = createProvider({
+  createProvider({
     injectables: {
-      a: ({ b }: { b: number }) => b,
-      c: ({ b }: { b: string }) => b,
-      b: 42,
+      a: ({ c }: { c: number }) => c,
+      b: ({ c }: { c: string }) => c,
+      // @ts-expect-error c does not satisfy a & b
+      c: 42,
     },
-    api: ['a'],
+    api: ['a', 'c'],
   });
-
-  // @ts-expect-error
-  // b can not be fulfilled
-  f();
 
   // when all dependencies are provide, external Deps is optional
   const provideFulfilled = createProvider({
@@ -253,11 +250,20 @@ createProvider: {
   provideMissing();
   // @ts-expect-error
   provideMissing({});
+
+  const provideWrongType = createProvider({
+    injectables: {
+      foo: ({ val }: { val: number }) => val,
+    },
+    api: ['foo'],
+  });
+  // @ts-expect-error wrong dependency type
+  provideWrongType({ val: "42" })
 }
 
 fromClass: {
   class Foo {
-    constructor({ b }: { b: string }) {}
+    constructor({ b }: { b: string }) { }
   }
   let factory = fromClass(Foo);
   factory({ b: 'woot' });
