@@ -79,6 +79,13 @@ export type ProviderFn<
   ? (externalDeps?: ProviderFnArgs<Registry>) => ModuleAPI<Registry, PublicAPI>
   : (externalDeps: ProviderFnArgs<Registry>) => ModuleAPI<Registry, PublicAPI>;
 
+/**
+ * Checks if each injectable match the required dependencies of the entire registry
+ */
+type ValidateRegistry<Registry extends ObjectLike, Deps = FlatDependencyTree<Registry>> = {
+  [key in keyof Registry]: key extends keyof Deps ? ((deps?: any) => Deps[key]) | Deps[key] : Registry[key];
+};
+
 declare function valueFn<T>(value: T): () => T;
 
 declare const provideSymbol: unique symbol;
@@ -91,7 +98,7 @@ declare function createProvider<
   Registry extends ObjectLike,
   PublicAPI extends Array<keyof Registry> = []
 >(args: {
-  injectables: Registry;
+  injectables: ValidateRegistry<Registry>;
   api?: PublicAPI;
 }): ProviderFn<Registry, PublicAPI>;
 
