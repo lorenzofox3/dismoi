@@ -1,8 +1,7 @@
-type Function = (...args: any[]) => any;
 /**
  * Factory as defined in the injectable property: either a function with eventually a single named dependencies argument object or a value
  */
-export type FactoryFn<FactoryLike> = FactoryLike extends Function
+export type FactoryFn<FactoryLike> = FactoryLike extends (args: any) => any
   ? FactoryLike
   : () => FactoryLike;
 
@@ -81,23 +80,24 @@ export type ProviderFn<
   : (externalDeps: ProviderFnArgs<Registry>) => ModuleAPI<Registry, PublicAPI>;
 
 /**
- * When injecting an injectable, it can be wrapped in a function to inject some dependencies
- * However, if the injectable is a function, we have to wrap it in a function to avoid calling it early
+ * If the injectable is a function, we have to wrap it in a function to avoid treating it as a factory
  */
-type WrapInjectable<T> = T extends Function ? (deps?: any) => T : ((deps?: any) => T) | T;
+type WrapFunctionInjectable<T> = T extends (...args: any[]) => any 
+  ? (deps?: any) => T 
+  : ((deps?: any) => T) | T;
   
 /**
  * Checks if each injectable match the required dependencies of the entire registry
  */
-export type ValidateRegistry<Registry extends ObjectLike, Deps = FlatDependencyTree<Registry>> = {
-  [key in keyof Registry]: key extends keyof Deps ? WrapInjectable<Deps[key]> : Registry[key];
+type ValidateRegistry<Registry extends ObjectLike, Deps = FlatDependencyTree<Registry>> = {
+  [key in keyof Registry]: key extends keyof Deps ? WrapFunctionInjectable<Deps[key]> : Registry[key];
 };
 
 declare function valueFn<T>(value: T): () => T;
 
 declare const provideSymbol: unique symbol;
 
-declare function singleton<Factory extends Function>(
+declare function singleton<Factory extends (...args: any[]) => any>(
   factory: Factory
 ): (...args: Parameters<Factory>) => ReturnType<Factory>;
 
