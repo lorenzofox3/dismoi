@@ -5,6 +5,7 @@ import type {
   Injectable,
   InjectableMap,
   ProviderFn,
+  WrapFunctionInjectable,
 } from './index';
 import {
   createProvider,
@@ -176,6 +177,11 @@ lateBoundDependencies: {
     // @ts-expect-error
     x: 'hello',
   };
+}
+
+wrapFunctionInjectable: {
+  // test that () => SomeUnionType is assignable to WrapFunctionInjectable<SomeUnionType>
+  let unionInjectable: WrapFunctionInjectable<'a' | 'b'> = (): 'a' | 'b' => 'a';
 }
 
 publicAPI: {

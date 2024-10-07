@@ -82,7 +82,7 @@ export type ProviderFn<
 /**
  * If the injectable is a function, we have to wrap it in a function to avoid treating it as a factory
  */
-type WrapFunctionInjectable<T> = T extends (...args: any[]) => any 
+type WrapFunctionInjectable<T> = [T] extends [(...args: any[]) => any]
   ? (deps?: any) => T 
   : ((deps?: any) => T) | T;
   
