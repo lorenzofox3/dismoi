@@ -5,6 +5,7 @@ import type {
   Injectable,
   InjectableMap,
   ProviderFn,
+  WrapFunctionInjectable,
 } from './index';
 import {
   createProvider,
@@ -178,6 +179,11 @@ lateBoundDependencies: {
   };
 }
 
+wrapFunctionInjectable: {
+  // test that () => SomeUnionType is assignable to WrapFunctionInjectable<SomeUnionType>
+  let unionInjectable: WrapFunctionInjectable<'a' | 'b'> = (): 'a' | 'b' => 'a';
+}
+
 publicAPI: {
   let publicAPI: ProviderFn<
     {
@@ -207,12 +213,15 @@ createProvider: {
     injectables: {
       foo: ({ a }: { a: number }) => a,
       bar: ({ b }: { b: string }) => b,
+      baz: ({ c }: { c: () => boolean }) => c(),
       // @ts-expect-error a is not a number
       a: "42",
       // @ts-expect-error b is not a string 
       b: () => 42 as number,
+      // @ts-expect-error c has to be wrapped in a function
+      c: () => true,
     },
-    api: ['foo', 'bar'],
+    api: ['foo', 'bar', 'baz'],
   });
 
   createProvider({
