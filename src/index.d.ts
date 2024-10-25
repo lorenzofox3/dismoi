@@ -31,11 +31,7 @@ type ObjectLike = Record<string, unknown>;
  * All the dependencies of the declared injectables on a registry
  */
 export type FlatDependencyTree<Registry extends ObjectLike> =
-  UnionToIntersection<
-    {
-      [key in keyof Registry]: Dependencies<Registry[key]>;
-    }[keyof Registry]
-  >;
+  UnionToIntersection<Dependencies<Registry[keyof Registry]>>;
 
 /**
  * All the Injectables defined by a registry
