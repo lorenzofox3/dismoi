@@ -20,7 +20,7 @@ type Dependencies<FactoryLike> = Defined<NamedArguments<FactoryLike>>;
 export type Injectable<FactoryLike> = ReturnType<FactoryFn<FactoryLike>>;
 
 type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
-  k: infer I
+  k: infer I,
 ) => void
   ? I
   : never;
@@ -40,21 +40,23 @@ export type InjectableMap<Registry extends ObjectLike> = {
   [key in keyof Registry]: Injectable<Registry[key]>;
 };
 
-type MaybeMet<Registry extends ObjectLike> =
-  keyof FlatDependencyTree<Registry> & keyof InjectableMap<Registry>;
-
 /**
- * Dependencies already met by the injectables themselves (union of keys)
+ * Dependencies already met by the injectables themselves
  */
-export type FulfilledDependencies<Registry extends ObjectLike> = {
-  [Dep in MaybeMet<Registry>]: InjectableMap<Registry>[Dep] extends FlatDependencyTree<Registry>[Dep]
+export type FulfilledDependencies<
+  Registry extends ObjectLike,
+  Dependencies = FlatDependencyTree<Registry>,
+  Injectables = InjectableMap<Registry>,
+> = {
+  [Dep in keyof Dependencies &
+    keyof Injectables as Injectables[Dep] extends Dependencies[Dep]
     ? Dep
-    : never;
-}[MaybeMet<Registry>];
+    : never]: Dependencies[Dep];
+};
 
 export type ExternalDeps<Registry extends ObjectLike> = Omit<
   FlatDependencyTree<Registry>,
-  FulfilledDependencies<Registry>
+  keyof FulfilledDependencies<Registry>
 > &
   Partial<InjectableMap<Registry>>;
 
@@ -70,23 +72,33 @@ type ProviderFnArgs<Registry extends ObjectLike> = {
 
 export type ProviderFn<
   Registry extends ObjectLike,
-  PublicAPI extends Array<keyof Registry> = []
-> = Partial<InjectableMap<Registry>> extends ExternalDeps<Registry>
-  ? (externalDeps?: ProviderFnArgs<Registry>) => ModuleAPI<Registry, PublicAPI>
-  : (externalDeps: ProviderFnArgs<Registry>) => ModuleAPI<Registry, PublicAPI>;
+  PublicAPI extends Array<keyof Registry> = [],
+> =
+  FulfilledDependencies<Registry> extends FlatDependencyTree<Registry>
+    ? (
+        externalDeps?: ProviderFnArgs<Registry>,
+      ) => ModuleAPI<Registry, PublicAPI>
+    : (
+        externalDeps: ProviderFnArgs<Registry>,
+      ) => ModuleAPI<Registry, PublicAPI>;
 
 /**
  * If the injectable is a function, we have to wrap it in a function to avoid treating it as a factory
  */
 type WrapFunctionInjectable<T> = [T] extends [(...args: any[]) => any]
-  ? (deps?: any) => T 
+  ? (deps?: any) => T
   : ((deps?: any) => T) | T;
-  
+
 /**
  * Checks if each injectable match the required dependencies of the entire registry
  */
-type ValidateRegistry<Registry extends ObjectLike, Deps = FlatDependencyTree<Registry>> = {
-  [key in keyof Registry]: key extends keyof Deps ? WrapFunctionInjectable<Deps[key]> : Registry[key];
+type ValidateRegistry<
+  Registry extends ObjectLike,
+  Deps = FlatDependencyTree<Registry>,
+> = {
+  [key in keyof Registry]: key extends keyof Deps
+    ? WrapFunctionInjectable<Deps[key]>
+    : Registry[key];
 };
 
 declare function valueFn<T>(value: T): () => T;
@@ -94,17 +106,17 @@ declare function valueFn<T>(value: T): () => T;
 declare const provideSymbol: unique symbol;
 
 declare function singleton<Factory extends (...args: any[]) => any>(
-  factory: Factory
+  factory: Factory,
 ): (...args: Parameters<Factory>) => ReturnType<Factory>;
 
 declare function createProvider<
   Registry extends ObjectLike,
-  PublicAPI extends Array<keyof Registry> = []
+  PublicAPI extends Array<keyof Registry> = [],
 >(args: {
   injectables: ValidateRegistry<Registry>;
   api?: PublicAPI;
 }): ProviderFn<Registry, PublicAPI>;
 
 declare function fromClass<T extends abstract new (deps: any) => any>(
-  Klass: T
+  Klass: T,
 ): (deps: Defined<ConstructorParameters<T>[0]>) => InstanceType<T>;

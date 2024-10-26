@@ -3,7 +3,7 @@ const mapValues = (mapFn) => (source) =>
     [
       ...Object.getOwnPropertyNames(source),
       ...Object.getOwnPropertySymbols(source),
-    ].map((key) => [key, mapFn(source[key], key)])
+    ].map((key) => [key, mapFn(source[key], key)]),
   );
 
 export const valueFn = (val) => () => val;
@@ -31,7 +31,7 @@ export const createProvider = ({ injectables, api = [] }) => {
           provide({
             ...externalDeps,
             ...subArgs,
-          })
+          }),
         ),
         ...externalDeps,
       },
@@ -40,13 +40,13 @@ export const createProvider = ({ injectables, api = [] }) => {
           if (!(prop in target)) {
             throw new Error(
               `could not resolve injectable with injection token "${String(
-                prop
-              )}"`
+                prop,
+              )}"`,
             );
           }
           return Reflect.get(target, prop, receiver);
         },
-      }
+      },
     );
 
     const mapWithPropertyDescriptor = mapValues((factory, key) => {
@@ -61,6 +61,7 @@ export const createProvider = ({ injectables, api = [] }) => {
     });
 
     const properties = mapWithPropertyDescriptor(_injectables);
+
     return Object.defineProperties(_injectables, properties);
   };
 };
