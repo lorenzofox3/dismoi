@@ -260,6 +260,20 @@ createProvider: {
   // @ts-expect-error
   provideMissing({});
 
+  const provideDeepMissing = createProvider({
+    injectables: {
+      foo: ({ service }: { service: number }) => service,
+      service: ({ nonTypedDep }) => nonTypedDep,
+      bar: ({ typedDep }: { typedDep: string }) => typedDep,
+    },
+    api: ['foo', 'bar'],
+  });
+  provideDeepMissing({ typedDep: 'toto', nonTypedDep: 42 });
+  // @ts-expect-error typedDep & nonTypedDep is missing here
+  provideDeepMissing();
+ // @ts-expect-error typedDep & nonTypedDep is missing here
+  provideDeepMissing({});
+
   const provideWrongType = createProvider({
     injectables: {
       foo: ({ val }: { val: number }) => val,
