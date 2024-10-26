@@ -112,31 +112,62 @@ fulfilledDependencies: {
     foo: (arg: { x: number; blah: string; woot: { prop: number } }) => any;
     x: ({ otherThing }: { otherThing: string; y: string }) => number;
     woot: () => { prop: number };
-  }> = 'x';
-  fulfilled = 'woot';
+  }> = {
+    woot: { prop: 42 },
+    x: 42,
+  };
 
-  // @ts-expect-error
-  // blah is not met
-  fulfilled = 'blah';
+  fulfilled = {
+    woot: { prop: 42 },
+    x: 42,
+    // @ts-expect-error
+    // blah is not met
+    blah: 'hello',
+  };
 
-  // @ts-expect-error
-  // otherThing is not met
-  fulfilled = 'otherThing';
+  fulfilled = {
+    woot: { prop: 42 },
+    x: 42,
+    // @ts-expect-error
+    // otherThing is not met
+    otherThing: 'hello',
+  };
+
+  fulfilled = {
+    // @ts-expect-error
+    // prop should be a number
+    woot: { prop: 'hello' },
+    x: 42,
+  };
 
   let incompatibleInterfaces: FulfilledDependencies<{
     x: (deps: { y: number; woot: { prop: { nested: number } } }) => any;
     y: () => string;
     woot: (deps: { met: string }) => { prop: { nested: string } };
     met: () => string;
-  }> = 'met';
+  }> = {
+    met: 'hello',
+  };
 
-  // @ts-expect-error
-  // y should return a number
-  incompatibleInterfaces = 'y';
+  incompatibleInterfaces = {
+    met: 'hello',
+    // @ts-expect-error
+    // y should return a number
+    y: 'hello',
 
-  // @ts-expect-error
-  // nested type should be number
-  incompatibleInterfaces = 'woot';
+    woot: {
+      prop: { nested: 'woot' },
+    },
+  };
+
+  incompatibleInterfaces = {
+    met: 'hello',
+    // @ts-expect-error
+    // nested should be a number
+    woot: {
+      prop: { nested: 'woot' },
+    },
+  };
 }
 
 lateBoundDependencies: {
@@ -215,8 +246,8 @@ createProvider: {
       bar: ({ b }: { b: string }) => b,
       baz: ({ c }: { c: () => boolean }) => c(),
       // @ts-expect-error a is not a number
-      a: "42",
-      // @ts-expect-error b is not a string 
+      a: '42',
+      // @ts-expect-error b is not a string
       b: () => 42 as number,
       // @ts-expect-error c has to be wrapped in a function
       c: () => true,
@@ -271,7 +302,7 @@ createProvider: {
   provideDeepMissing({ typedDep: 'toto', nonTypedDep: 42 });
   // @ts-expect-error typedDep & nonTypedDep is missing here
   provideDeepMissing();
- // @ts-expect-error typedDep & nonTypedDep is missing here
+  // @ts-expect-error typedDep & nonTypedDep is missing here
   provideDeepMissing({});
 
   const provideWrongType = createProvider({
@@ -281,12 +312,12 @@ createProvider: {
     api: ['foo'],
   });
   // @ts-expect-error wrong dependency type
-  provideWrongType({ val: "42" })
+  provideWrongType({ val: '42' });
 }
 
 fromClass: {
   class Foo {
-    constructor({ b }: { b: string }) { }
+    constructor({ b }: { b: string }) {}
   }
   let factory = fromClass(Foo);
   factory({ b: 'woot' });
@@ -309,11 +340,10 @@ issue4: {
   };
   const provideMissingWithIntermediate = createProvider({
     injectables: injectables,
-    api: ['a']
+    api: ['a'],
   });
 
-
   provideMissingWithIntermediate({
-    value: ({ intermediate }: { intermediate: string }) => Number(intermediate)
-  })
+    value: ({ intermediate }: { intermediate: string }) => Number(intermediate),
+  });
 }
